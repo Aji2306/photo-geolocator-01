@@ -421,6 +421,9 @@ function extractFeatures(jpeg: Uint8Array, p: Priors): number[] {
 }
 
 function guess(feat: number[], ref: RefSet): [number, number] {
+  // A photo with no reference to compare against falls back to the
+  // geographic centre rather than crashing on an empty neighbour list.
+  if (ref.feats.length === 0) return xyzToLatLon(ref.priorXyz);
   const dists: { d: number; i: number }[] = [];
   for (let i = 0; i < ref.feats.length; i += 1) {
     const f = ref.feats[i]!;
@@ -432,7 +435,7 @@ function guess(feat: number[], ref: RefSet): [number, number] {
     dists.push({ d: Math.sqrt(s), i });
   }
   dists.sort((a, b) => a.d - b.d);
-  const top = dists.slice(0, K);
+  const top = dists.slice(0, Math.min(K, dists.length));
   let wsum = 0;
   let vx = 0;
   let vy = 0;
