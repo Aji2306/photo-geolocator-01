@@ -363,6 +363,19 @@ function downsample(rgb: number[][][], rows: number, cols: number): number[] {
 }
 
 // ------------------------------------------------------------------ guessing
+//
+// The guess is a colour vote, not a lookup: a photo is placed by how close
+// its colour grid sits to the practice photos' grids, and the vote is then
+// pulled toward the practice set's geographic centre by how far even the
+// closest practice photo is. That pull is what keeps a photo with no good
+// colour match from landing on a single far-away lookalike. The centre is
+// the 3D mean of the practice photos' places, so it is the single guess with
+// the smallest expected error when nothing matches well.
+
+/** The 3D mean of the practice photos' places, as a latitude/longitude pair. */
+function priorLatLon(p: Priors): [number, number] {
+  return [p.priorLatE6 / 1e6, p.priorLonE6 / 1e6];
+}
 
 function latLonToXyz(latDeg: number, lonDeg: number): [number, number, number] {
   const la = (latDeg * Math.PI) / 180;
